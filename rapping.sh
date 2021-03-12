@@ -12,6 +12,25 @@ ippat="\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9
 y=0
 n=0
 
+# changes behavior of the "trap", depending on the presence or absence of responses from the investigated address
+
+fortrap () {
+
+	if [[ "$rapid" -ne 0 ]]; then
+		if [[ "$n" == "$i" ]]; then																							
+			echo -e "\r"
+				tail -n 3 /tmp/rapid.tmp | sed -e '2s/^1/'$n'/;2s/+1/+'$n'/'
+				rm /tmp/rapid.tmp
+				exit 1   
+		else
+			echo -e "\r"
+			rtt
+		fi
+	fi
+}
+
+trap 'fortrap' 2
+
 usage () {
 
 	echo -e "use like this: ping [-c(count, default=5) -s(size(bytess) default=56) -r(rapid)] ip addres(X.X.X.X)"
@@ -31,22 +50,6 @@ if [[ "$#" == 1 ]]; then
  	fi
 fi
 
-# changes behavior of the "trap", depending on the presence or absence of responses from the investigated address
-
-fortrap () {
-
-	if [[ "$n" == "$i" ]]; then																							
-		echo -e "\r"
-        	tail -n 3 /tmp/rapid.tmp | sed -e '2s/^1/'$n'/;2s/+1/+'$n'/'
-			rm /tmp/rapid.tmp
-        	exit 1   
-	else
-		echo -e "\r"
-		rtt
-	fi
-}
-
-trap 'fortrap' 2
 
 # sent one packet at a time the specified number of times, depending on the answer or lack of it, the terminal 
 # displays "!" or "." respectively, and count the number of positive and negative responses to compute rtt
@@ -84,12 +87,14 @@ rping () {
 	echo -e "\r"
 
 	rtt
+	rm /tmp/rapid.tmp
 }
 
 # read rtt based on data from /tmp/rapid.tmp and print to terminal
 
 rtt () {
 	
+	durat=$(echo "$SECONDS * 1000" | bc)
 	rttpat="([[:digit:]]+\.[[:digit:]]{3}/?){3}"
 	min=$(egrep -o $rttpat /tmp/rapid.tmp | cut -d '/' -f 1 | sort -nk1 | head -n 1)
 	max=$(egrep -o $rttpat /tmp/rapid.tmp | cut -d '/' -f 1 | sort -nk1 | tail -n 1)
@@ -106,7 +111,7 @@ rtt () {
 	loss=$(echo "100 - ($y * 100 / $count)" | bc)
 
 	echo "$(grep -m 1 '\-\-\-' /tmp/rapid.tmp)"
-	echo ""$i" packets transmitted, "$y" received, $n packet loss, time $(echo "$SECONDS * 1000" | bc)ms"
+	echo ""$i" packets transmitted, "$y" received, $n packet loss, time "$durat"ms"
    	echo "rtt min/avg/max/mdev = $min/$avg/$max/$mdev ms"
 	exit 0
 }
@@ -125,9 +130,7 @@ while [[ -n "$1" ]]; do
  		"$ipadd")				shift
 							dst="$ipadd"
 							;;
-		
-		-r)					shift	
-							rapid=1
+		-r)					rapid=1
 							;;
 		*)					echo "error: \""$1"\" invalid value"
 							usage >&2
