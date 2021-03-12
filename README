@@ -37,4 +37,14 @@
 # 
 # 
 # to use normal ping add backslash before the command: \ping [...] ip addres
-
+# 
+# dczi@toad[~]$ \ping 10.237.149.64
+# PING 10.237.149.64 (10.237.149.64) 56(84) bytes of data.
+# 64 bytes from 10.237.149.64: icmp_seq=1 ttl=61 time=13.0 ms
+# 64 bytes from 10.237.149.64: icmp_seq=2 ttl=61 time=38.5 ms
+# 64 bytes from 10.237.149.64: icmp_seq=3 ttl=61 time=12.10 ms
+# 64 bytes from 10.237.149.64: icmp_seq=4 ttl=61 time=12.9 ms
+# ^C
+# --- 10.237.149.64 ping statistics ---
+# 4 packets transmitted, 4 received, 0% packet loss, time 7ms
+# rtt min/avg/max/mdev = 12.921/19.346/38.470/11.042 ms
