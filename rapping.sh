@@ -3,6 +3,8 @@
 
 # This is a bash script that turns ping for Linux into a "rapid ping" like Cisco or Juniper. 
 
+rm /tmp/rapid.tmp
+
 
 rapid=0
 count=5
